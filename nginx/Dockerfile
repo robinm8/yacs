@@ -1,10 +1,8 @@
-FROM nginx
+FROM nginx:1.11.9-alpine
 
 MAINTAINER Mark Robinson <robinm8@rpi.edu>
 
-RUN rm /etc/nginx/nginx.conf && \
-    rm /etc/nginx/conf.d/default.conf
+RUN rm -r /etc/nginx/
 
-RUN mkdir /etc/nginx/cache
-
-COPY ./ /etc/nginx/
+RUN apk update && \ 
+    apk add bash bash-completion vim 
