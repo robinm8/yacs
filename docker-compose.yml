@@ -1,50 +1,53 @@
 version: '2'
 
 services:
-  postgres:
-    image: postgres:9.5.6
-    restart: unless-stopped
-    expose:
-      - "5432"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+    postgres:
+        image: postgres:9.5.6-alpine
+        restart: unless-stopped
+        expose:
+            - "5432"
+        volumes:
+            - ./data/postgres:/var/lib/postgresql/data
 
-  nginx:
-    build: ./nginx
-    image: nginx:1.11.9
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    links:
-      - web
-    volumes:
-      - .:/usr/src/app/
+    nginx:
+        build: ./nginx
+        restart: unless-stopped
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - web
+        volumes:
+            - .:/usr/src/app/
+            - ./nginx/:/etc/nginx/
 
-  web:
-    build: .
-    restart: unless-stopped
-    environment:
-      - RAILS_ENV=${RAILS_ENV}
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - SECRET_TOKEN=${SECRET_TOKEN}
-      - WEB_CONCURRENCY=${WEB_CONCURRENCY}
-      - MAX_THREADS=${MAX_THREADS}
-    volumes:
-      - .:/usr/src/app/
-    depends_on:
-      - postgres
-    command: bundle exec puma -C config/puma.rb
-    expose:
-      - "3000"
+    web:
+        build: .
+        restart: unless-stopped
+        environment:
+            - RAILS_ENV=${RAILS_ENV}
+            - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+            - SECRET_TOKEN=${SECRET_TOKEN}
+            - WEB_CONCURRENCY=${WEB_CONCURRENCY}
+            - MAX_THREADS=${MAX_THREADS}
+        volumes:
+            - .:/usr/src/app/
+            - ./nginx/:/etc/puma/
+        depends_on:
+            - postgres
+        command: bundle exec puma -C config/puma.rb
+        expose:
+            - "3000"
 
-  worker:
-    build: .
-    restart: unless-stopped
-    environment:
-      - RAILS_ENV=${RAILS_ENV}
-    volumes:
-      - .:/usr/src/app/
-    depends_on:
-      - postgres
-    command: bundle exec crono
+    worker:
+        build: .
+        restart: unless-stopped
+        environment:
+            - RAILS_ENV=${RAILS_ENV}
+        volumes:
+            - .:/usr/src/app/
+        depends_on:
+            - postgres
+        command: bundle exec crono
+        logging:
+            driver: "none"
