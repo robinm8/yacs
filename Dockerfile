@@ -20,6 +20,3 @@ COPY Gemfile Gemfile.lock $INSTALL_PATH
 
 RUN bundle install
 COPY . $INSTALL_PATH
-
-RUN mkdir -p /etc/puma/ssl
-COPY nginx/ssl/ /etc/puma/ssl/
