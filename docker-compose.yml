@@ -21,6 +21,12 @@ services:
             - .:/usr/src/app/
             - ./nginx/:/etc/nginx/
 
+    redis:
+        image: redis
+        restart: unless-stopped
+        expose:
+            - "6379"
+
     web:
         build: .
         restart: unless-stopped
