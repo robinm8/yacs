@@ -9,6 +9,23 @@ services:
         volumes:
             - ./data/postgres:/var/lib/postgresql/data
 
+    pgadmin:
+        build: ./pgadmin
+        restart: unless-stopped
+        environment:
+            - SERVER_MODE=True
+            - PGADMIN_SETUP_EMAIL=robinm8@rpi.edu
+            - PGADMIN_SETUP_PASSWORD=robinm8
+        expose:
+            - "80"
+        links:
+            - postgres
+        volumes:
+            - ./pgadmin/pgadmin4/config_local.py:/usr/local/lib/python2.7/site-packages/pgadmin4/config_local.py
+              pgadmin/pgadmin4/pgadmin/redirects
+            - ./pgadmin/pgadmin4/pgadmin/redirects/__init__.py:/usr/local/lib/python2.7/site-packages/pgadmin4/pgadmin/redirects/__init__.py
+            - ./pgadmin/data:/data
+
     nginx:
         build: ./nginx
         restart: unless-stopped
@@ -17,6 +34,7 @@ services:
             - "443:443"
         links:
             - web
+            - pgadmin
         volumes:
             - .:/usr/src/app/
             - ./nginx/:/etc/nginx/
@@ -55,5 +73,3 @@ services:
         depends_on:
             - postgres
         command: bundle exec crono
-        logging:
-            driver: "none"
